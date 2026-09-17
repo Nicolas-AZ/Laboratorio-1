@@ -8,7 +8,8 @@ import {
 	type GetTodoByIdDto,
 	type UpdateTodoDto,
 	type CreateTodoDto,
-	type TodoRepository
+	type TodoRepository,
+	type TodoFilterStrategy
 } from '../domain';
 
 export class TodoRepositoryImpl implements TodoRepository {
@@ -18,8 +19,11 @@ export class TodoRepositoryImpl implements TodoRepository {
 		return await this.datasource.create(createDto);
 	}
 
-	async getAll(pagination: PaginationDto): Promise<PaginationResponseEntity<TodoEntity[]>> {
-		return await this.datasource.getAll(pagination);
+	async getAll(
+		pagination: PaginationDto,
+		filterStrategy: TodoFilterStrategy
+	): Promise<PaginationResponseEntity<TodoEntity[]>> {
+		return await this.datasource.getAll(pagination, filterStrategy);
 	}
 
 	async getById(getByIdDto: GetTodoByIdDto): Promise<TodoEntity> {

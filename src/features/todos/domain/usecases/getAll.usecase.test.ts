@@ -1,6 +1,7 @@
 import { PaginationDto } from '../../../shared';
 import { TodoEntity } from '../entities';
 import { TodoRepository } from '../repositories/respository';
+import { AllTodosStrategy } from '../strategies/todo-filter.strategy';
 import { GetTodos, GetTodosUseCase } from './getAll.usecase';
 
 describe('tests in getAll.usecase.ts', () => {
@@ -21,6 +22,7 @@ describe('tests in getAll.usecase.ts', () => {
 
 	test('should call repository.getAll with correct parameters', async () => {
 		const paginationDto = PaginationDto.create({ page: 1, limit: 10 });
+		const filterStrategy = new AllTodosStrategy();
 
 		const paginationResult = {
 			results: [new TodoEntity(1, 'Test Todo')],
@@ -33,18 +35,19 @@ describe('tests in getAll.usecase.ts', () => {
 
 		repository.getAll.mockResolvedValue(paginationResult);
 
-		const result = await getTodosUseCase.execute(paginationDto);
+		const result = await getTodosUseCase.execute(paginationDto, filterStrategy);
 
-		expect(repository.getAll).toHaveBeenCalledWith(paginationDto);
+		expect(repository.getAll).toHaveBeenCalledWith(paginationDto, filterStrategy);
 		expect(result).toBe(paginationResult);
 	});
 
 	test('should throw an error if repository.getAll fails', async () => {
 		const paginationDto = PaginationDto.create({ page: 1, limit: 10 });
+		const filterStrategy = new AllTodosStrategy();
 		const errorMessage = 'GetAll failed';
 
 		repository.getAll.mockRejectedValue(new Error(errorMessage));
 
-		await expect(getTodosUseCase.execute(paginationDto)).rejects.toThrow(errorMessage);
+		await expect(getTodosUseCase.execute(paginationDto, filterStrategy)).rejects.toThrow(errorMessage);
 	});
 });

@@ -1,6 +1,7 @@
 import { PaginationDto, PaginationResponseEntity } from '../../../shared';
 import { CreateTodoDto, GetTodoByIdDto, UpdateTodoDto } from '../dtos';
 import { TodoEntity } from '../entities';
+import { AllTodosStrategy, TodoFilterStrategy } from '../strategies/todo-filter.strategy';
 import { TodoDatasource } from './datasource';
 
 describe('tests in datasource.test.ts', () => {
@@ -11,7 +12,10 @@ describe('tests in datasource.test.ts', () => {
 			return todo;
 		}
 
-		async getAll(pagination: PaginationDto): Promise<PaginationResponseEntity<TodoEntity[]>> {
+		async getAll(
+			pagination: PaginationDto,
+			filterStrategy: TodoFilterStrategy
+		): Promise<PaginationResponseEntity<TodoEntity[]>> {
 			return {
 				results: [todo],
 				currentPage: 1,
@@ -46,7 +50,7 @@ describe('tests in datasource.test.ts', () => {
 		expect(typeof mockDatasource.update).toBe('function');
 		expect(typeof mockDatasource.delete).toBe('function');
 
-		const todos = await mockDatasource.getAll(PaginationDto.create({ page: 1, limit: 10 }));
+		const todos = await mockDatasource.getAll(PaginationDto.create({ page: 1, limit: 10 }), new AllTodosStrategy());
 		expect(todos.results).toHaveLength(1);
 		expect(todos.results).toBeInstanceOf(Array);
 		expect(todos.results[0]).toBeInstanceOf(TodoEntity);

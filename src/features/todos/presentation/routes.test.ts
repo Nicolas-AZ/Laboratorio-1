@@ -179,6 +179,41 @@ describe('tests in routes', () => {
 			});
 	});
 
+	test('should return only completed TODOs when completed is true', async () => {
+		await request(testServer.app)
+			.get(`${url}?completed=true`)
+			.expect(HttpCode.OK)
+			.then(({ body }: { body: SuccessResponse<PaginationResponseEntity<TodoEntity[]>> }) => {
+				expect(body.data?.results).toEqual([{ id: 1, isCompleted: true, text: 'First TODO...' }]);
+				expect(body.data?.total).toBe(1);
+				expect(body.data?.totalPages).toBe(1);
+			});
+	});
+
+	test('should return only pending TODOs when completed is false', async () => {
+		await request(testServer.app)
+			.get(`${url}?completed=false`)
+			.expect(HttpCode.OK)
+			.then(({ body }: { body: SuccessResponse<PaginationResponseEntity<TodoEntity[]>> }) => {
+				expect(body.data?.results.every((todo) => !todo.isCompleted)).toBe(true);
+				expect(body.data?.results).toHaveLength(2);
+				expect(body.data?.total).toBe(2);
+				expect(body.data?.totalPages).toBe(1);
+			});
+	});
+
+	test('should return bad request for an invalid completed filter', async () => {
+		await request(testServer.app)
+			.get(`${url}?completed=invalid`)
+			.expect(HttpCode.BAD_REQUEST)
+			.then(({ body }: { body: ErrorResponse }) => {
+				expect(body.message).toBe('Error validating completed filter');
+				expect(body.validationErrors).toEqual([
+					{ fields: ['completed'], constraint: 'Completed must be true or false' }
+				]);
+			});
+	});
+
 	test('should delete a TODO /todos/1', async () => {
 		const expectedResponse = {
 			data: {
