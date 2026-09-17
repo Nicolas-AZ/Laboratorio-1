@@ -157,6 +157,7 @@ Retrieves a paginated list of todos.
 
 - `page` (number, optional): The page number to retrieve. Defaults to `1`.
 - `limit` (number, optional): The number of items per page. Defaults to `10`.
+- `completed` (boolean, optional): Filters tasks by completion status. Accepted values are `true` and `false`.
 
 > Ensure that the values for `page` and `limit` are valid positive integers to avoid errors.
 

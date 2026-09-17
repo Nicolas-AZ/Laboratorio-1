@@ -1,7 +1,7 @@
 // src\features\todos\infraestructure\local.datasource.impl.ts
 
 import { ONE, ZERO, AppError } from '../../../core';
-import { type PaginationDto, type PaginationResponseEntity } from '../../shared';
+import { type PaginationResponseEntity } from '../../shared';
 import {
 	TodoEntity,
 	type CreateTodoDto,
@@ -9,6 +9,7 @@ import {
 	type UpdateTodoDto,
 	type TodoDatasource
 } from '../domain';
+import { type GetTodosDto, resolveTodoFilterStrategy } from '../domain';
 
 const TODOS_MOCK = [
 	{
@@ -24,18 +25,19 @@ const TODOS_MOCK = [
 ];
 
 export class TodoDatasourceImpl implements TodoDatasource {
-	public async getAll(pagination: PaginationDto): Promise<PaginationResponseEntity<TodoEntity[]>> {
-		const { page, limit } = pagination;
+	public async getAll(query: GetTodosDto): Promise<PaginationResponseEntity<TodoEntity[]>> {
+		const { page, limit, completed } = query;
 
-		const todos = TODOS_MOCK;
-		const total = TODOS_MOCK.length;
+		const strategy = resolveTodoFilterStrategy(completed);
+		const todos = strategy.filter(TODOS_MOCK.map((todo) => TodoEntity.fromJson(todo)));
+		const total = todos.length;
 
 		const totalPages = Math.ceil(total / limit);
 		const nextPage = page < totalPages ? page + ONE : null;
 		const prevPage = page > ONE ? page - ONE : null;
 
 		return {
-			results: todos.slice((page - ONE) * limit, page * limit).map((todo) => TodoEntity.fromJson(todo)),
+			results: todos.slice((page - ONE) * limit, page * limit),
 			currentPage: page,
 			nextPage,
 			prevPage,
