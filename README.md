@@ -8,86 +8,96 @@ Explore the world of API development using Node.js, Express, and TypeScript. Lea
 
 ## Installation
 
-Clone this repository:
+1. Clone this repository:
 
-```bash
-git clone https://github.com/Nicolas-AZ/Laboratorio-1.git
-Install dependencies:
+   ```bash
+   git clone https://github.com/Nicolas-AZ/Laboratorio-1.git
+   ```
 
-bash
-yarn
-Clone the .env.template file and rename it to .env:
+2. Install dependencies:
 
-bash
-cp .env.template .env
-Replace your environment variables in the .env file.
+   ```bash
+   yarn
+   ```
 
-Running the App
+3. Clone the `.env.template` file and rename it to `.env`:
+
+   ```bash
+   cp .env.template .env
+   ```
+
+4. Replace your environment variables in the `.env` file.
+
+## Running the App
+
 Run in development mode:
 
-bash
+```bash
 yarn dev
+```
+
 Create a production build:
 
-bash
+```bash
 yarn build
+```
+
 Run tests:
 
-bash
+```bash
 yarn test
+```
+
 Run tests in watch mode:
 
-bash
+```bash
 yarn test:watch
-Built With
-Node
+```
 
-TypeScript
+## Built With
 
-Express
+- [Node](https://nodejs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Express](https://expressjs.com/)
+- ESLint & Prettier
+- Environment Variables
+- Unit testing with Jest & Supertest
+- Clean Architecture
+- Repository Pattern
+- Adapter Pattern
+- Use Cases
+- DTOs (Data Transfer Objects)
 
-ESLint & Prettier
+## API Documentation
 
-Environment Variables
+> This entire implementation is based on an in-memory database for example purposes. **No real database is being used.** When the server is re-run, the in-memory database will be re-created.
+>
+> Also, simple implementations have been created to encrypt and validate authentication tokens (no third-party dependencies are used for this). If you use this repository as an example, it is recommended that you modify these implementations using libraries or your own implementations (`src/core/config` folder).
 
-Unit testing with Jest & Supertest
+### Authentication
 
-Clean Architecture
+#### `POST /api/v1/auth/register`
 
-Repository Pattern
-
-Adapter Pattern
-
-Use Cases
-
-DTOs (Data Transfer Objects)
-
-API Documentation
-This entire implementation is based on an in-memory database for example purposes. NO real database is being used. When the server is re-run, the in-memory database will be re-created.
-
-Also, simple implementations have been created to encrypt and validate authentication tokens (no third-party dependencies are used for this). If you use this repository as an example, it is recommended that you modify these implementations using libraries or your own implementations (src/core/config folder).
-
-Authentication
-POST /api/v1/auth/register
 Registers a new user in the in-memory database.
 
-Request Body
+**Request Body**
 
-json
+```json
 {
   "name": "string",
   "email": "string",
   "password": "string"
 }
-Response Codes
+```
 
-400 Bad Request: Returned if the request body is invalid.
+**Response Codes**
 
-201 Created: Returned if the request is successful.
+- `400 Bad Request`: Returned if the request body is invalid.
+- `201 Created`: Returned if the request is successful.
 
-Response
+**Response**
 
-json
+```json
 {
   "data": {
     "user": {
@@ -100,25 +110,29 @@ json
     "token": "string"
   }
 }
-POST /api/v1/auth/login
+```
+
+#### `POST /api/v1/auth/login`
+
 Logs in a user.
 
-Request Body
+**Request Body**
 
-json
+```json
 {
   "email": "string",
   "password": "string"
 }
-Response Codes
+```
 
-400 Bad Request: Returned if the request body is invalid.
+**Response Codes**
 
-200 OK: Returned if the request is successful.
+- `400 Bad Request`: Returned if the request body is invalid.
+- `200 OK`: Returned if the request is successful.
 
-Response
+**Response**
 
-json
+```json
 {
   "data": {
     "user": {
@@ -131,27 +145,29 @@ json
     "token": "string"
   }
 }
-Todos
-GET /api/v1/todos
+```
+
+### Todos
+
+#### `GET /api/v1/todos`
+
 Retrieves a paginated list of todos.
 
-Query Parameters
+**Query Parameters**
 
-page (number, optional): The page number to retrieve. Defaults to 1.
+- `page` (number, optional): The page number to retrieve. Defaults to `1`.
+- `limit` (number, optional): The number of items per page. Defaults to `10`.
 
-limit (number, optional): The number of items per page. Defaults to 10.
+> Ensure that the values for `page` and `limit` are valid positive integers to avoid errors.
 
-Ensure that the values for page and limit are valid positive integers to avoid errors.
+**Response Codes**
 
-Response Codes
+- `400 Bad Request`: Returned if query parameters are invalid.
+- `200 OK`: Returned if the request is successful.
 
-400 Bad Request: Returned if query parameters are invalid.
+**Response**
 
-200 OK: Returned if the request is successful.
-
-Response
-
-json
+```json
 {
   "data": {
     "results": [
@@ -168,22 +184,24 @@ json
     "totalPages": "number"
   }
 }
-GET /api/v1/todos/:id
+```
+
+#### `GET /api/v1/todos/:id`
+
 Retrieves a single todo item by its id.
 
-Path Parameters
+**Path Parameters**
 
-id (number): The id of the todo item to retrieve.
+- `id` (number): The id of the todo item to retrieve.
 
-Response Codes
+**Response Codes**
 
-404 Not Found: Returned if the todo item with the specified id does not exist.
+- `404 Not Found`: Returned if the todo item with the specified id does not exist.
+- `200 OK`: Returned if the request is successful.
 
-200 OK: Returned if the request is successful.
+**Response**
 
-Response
-
-json
+```json
 {
   "data": {
     "id": "number",
@@ -191,30 +209,35 @@ json
     "isCompleted": "boolean"
   }
 }
-POST /api/v1/todos
-Creates a new todo item. You need to be logged in previously. This endpoint requires authorization because it is protected with AuthMiddleware.
+```
 
-Authorization
+#### `POST /api/v1/todos`
 
-text
+Creates a new todo item. You need to be logged in previously. This endpoint requires authorization because it is protected with `AuthMiddleware`.
+
+**Authorization**
+
+```
 Bearer <token>
-Request Body
+```
 
-json
+**Request Body**
+
+```json
 {
   "text": "string"
 }
-Response Codes
+```
 
-401 Unauthorized: Returned if the request is not authorized.
+**Response Codes**
 
-400 Bad Request: Returned if the request body is invalid.
+- `401 Unauthorized`: Returned if the request is not authorized.
+- `400 Bad Request`: Returned if the request body is invalid.
+- `201 Created`: Returned if the request is successful.
 
-201 Created: Returned if the request is successful.
+**Response**
 
-Response
-
-json
+```json
 {
   "data": {
     "id": "number",
@@ -222,31 +245,34 @@ json
     "isCompleted": "boolean"
   }
 }
-PUT /api/v1/todos/:id
+```
+
+#### `PUT /api/v1/todos/:id`
+
 Updates a todo item's properties by its id.
 
-Path Parameters
+**Path Parameters**
 
-id (number): The id of the todo item to update.
+- `id` (number): The id of the todo item to update.
 
-Request Body
+**Request Body**
 
-json
+```json
 {
   "text": "string",
   "isCompleted": "boolean"
 }
-Response Codes
+```
 
-404 Not Found: Returned if the todo item with the specified id does not exist.
+**Response Codes**
 
-400 Bad Request: Returned if the request body is invalid.
+- `404 Not Found`: Returned if the todo item with the specified id does not exist.
+- `400 Bad Request`: Returned if the request body is invalid.
+- `200 OK`: Returned if the request is successful.
 
-200 OK: Returned if the request is successful.
+**Response**
 
-Response
-
-json
+```json
 {
   "data": {
     "id": "number",
@@ -254,22 +280,24 @@ json
     "isCompleted": "boolean"
   }
 }
-DELETE /api/v1/todos/:id
+```
+
+#### `DELETE /api/v1/todos/:id`
+
 Deletes a todo item by its id.
 
-Path Parameters
+**Path Parameters**
 
-id (number): The id of the todo item to delete.
+- `id` (number): The id of the todo item to delete.
 
-Response Codes
+**Response Codes**
 
-404 Not Found: Returned if the todo item with the specified id does not exist.
+- `404 Not Found`: Returned if the todo item with the specified id does not exist.
+- `200 OK`: Returned if the request is successful.
 
-200 OK: Returned if the request is successful.
+**Response**
 
-Response
-
-json
+```json
 {
   "data": {
     "id": "number",
@@ -277,8 +305,11 @@ json
     "isCompleted": "boolean"
   }
 }
-Project Structure
-text
+```
+
+## Project Structure
+
+```text
 node-template-server/
 │
 ├── dist/
@@ -340,34 +371,48 @@ node-template-server/
 ├── ...
 ├── package.json
 └── ...
-Domain — Entities
+```
+
+## Architecture
+
+### Domain — Entities
+
 Entities are objects that represent fundamental concepts of the application domain. These objects encapsulate the essential state and behavior of key elements within the system.
 
-Domain — Repositories
+### Domain — Repositories
+
 Repositories are a data access abstraction that act as an interface between the domain layer and the infrastructure layer. Their primary purpose is to encapsulate the logic related to data storage and retrieval, providing an abstraction layer that allows the domain layer to work with entities without worrying about the specific details of how data is stored or retrieved.
 
-Domain — Use Cases
+### Domain — Use Cases
+
 Use cases represent the specific actions or functionalities that can be performed by a user or a system within the application. These use cases encapsulate the business logic in a way that is independent of infrastructure and implementation details, making them portable and reusable in different contexts.
 
-Domain — Data Sources
+### Domain — Data Sources
+
 Data sources are interfaces or abstractions that represent the data source from which the data needed for the application is obtained. These data sources can be databases, web services, file systems, or any other form of data storage. The use of data sources helps decouple business logic from the specific details of the data source. This means that the domain layer can work with data sources through generic interfaces without knowing the specific implementation details, making it easy to exchange or update the data source without affecting the application logic.
 
-Domain — DTOs
+### Domain — DTOs
+
 DTOs (Data Transfer Objects) are objects that are used to transfer data between different layers of the application, especially between the presentation layer and the domain or infrastructure layer. DTOs encapsulate related data and transport it from one context to another without exposing the underlying business logic. The main function of DTOs is to represent information in a structured and coherent way, facilitating its transport through the application.
 
-Infrastructure — Repository Implementation
+### Infrastructure — Repository Implementation
+
 The repository implementation at the infrastructure layer is responsible for providing a concrete implementation of the methods defined in the repository interface at the domain layer. This implementation is responsible for interacting with the actual data source, such as a database, an external service, or any other data persistence mechanism.
 
-Infrastructure — Data Source Implementation
+### Infrastructure — Data Source Implementation
+
 The data source implementation in the infrastructure layer is responsible for providing a concrete implementation of the methods defined in the data source interface in the domain layer. This component is responsible for interacting directly with the actual data source, such as a database, a web service, or any other data storage medium.
 
-Presentation — Controller
+### Presentation — Controller
+
 Controllers are presentation layer components that act as entry points for client requests in an application. These controllers are responsible for receiving HTTP requests, processing them, and directing them to the corresponding business logic in the domain layer.
 
-Presentation — Routes
+### Presentation — Routes
+
 Routes are presentation layer components that are responsible for defining routes and handling incoming HTTP requests to an application. These routes are used to map HTTP requests to the corresponding controllers and establish the API structure or routing of the application. It is also where our data source and our repository are initialized, the same that is necessary for our controller.
 
-Architecture Notes
+## Architecture Notes
+
 Implementing a REST API using Node.js, Express, and following good development practices and Clean Architecture provides a solid foundation for developing modern and scalable web applications. By taking a modular approach and focusing on separation of concerns, developers can achieve a clean, maintainable architecture that encourages flexibility and continuous system evolution.
 
 The application of Clean Architecture allows you to maintain a clear separation between the different layers of the application, such as the domain layer, the infrastructure layer, and the presentation layer, making it easier to understand and maintain the code over time. Additionally, adopting good development practices such as using middlewares for intermediate tasks, validating input data, and proper error handling contributes to creating a robust and secure API.
