@@ -1,6 +1,6 @@
 // src\features\todos\infraestructure\repository.impl.ts
 
-import { type PaginationDto, type PaginationResponseEntity } from '../../shared';
+import { type PaginationResponseEntity } from '../../shared';
 
 import {
 	type TodoEntity,
@@ -8,6 +8,7 @@ import {
 	type GetTodoByIdDto,
 	type UpdateTodoDto,
 	type CreateTodoDto,
+	type GetTodosDto,
 	type TodoRepository
 } from '../domain';
 
@@ -18,8 +19,8 @@ export class TodoRepositoryImpl implements TodoRepository {
 		return await this.datasource.create(createDto);
 	}
 
-	async getAll(pagination: PaginationDto): Promise<PaginationResponseEntity<TodoEntity[]>> {
-		return await this.datasource.getAll(pagination);
+	async getAll(query: GetTodosDto): Promise<PaginationResponseEntity<TodoEntity[]>> {
+		return await this.datasource.getAll(query);
 	}
 
 	async getById(getByIdDto: GetTodoByIdDto): Promise<TodoEntity> {

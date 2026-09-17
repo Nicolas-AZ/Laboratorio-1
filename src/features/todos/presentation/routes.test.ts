@@ -179,6 +179,37 @@ describe('tests in routes', () => {
 			});
 	});
 
+	test('should return only completed TODOs when completed=true', async () => {
+		const expectedResponse = {
+			data: {
+				currentPage: 1,
+				nextPage: null,
+				prevPage: null,
+				results: [{ id: 1, isCompleted: true, text: 'First TODO...' }],
+				total: 1,
+				totalPages: 1
+			}
+		};
+
+		await request(testServer.app)
+			.get(`${url}?completed=true`)
+			.expect(HttpCode.OK)
+			.expect('Content-Type', /json/)
+			.then(({ body }: { body: SuccessResponse<PaginationResponseEntity<TodoEntity[]>> }) => {
+				expect(body).toEqual(expectedResponse);
+			});
+	});
+
+	test('should reject an invalid completed filter', async () => {
+		await request(testServer.app)
+			.get(`${url}?completed=yes`)
+			.expect(HttpCode.BAD_REQUEST)
+			.expect('Content-Type', /json/)
+			.then(({ body }: { body: ErrorResponse }) => {
+				expect(body.message).toEqual('Error validating get todos');
+			});
+	});
+
 	test('should delete a TODO /todos/1', async () => {
 		const expectedResponse = {
 			data: {

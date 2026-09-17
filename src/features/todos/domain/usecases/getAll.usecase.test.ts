@@ -1,5 +1,5 @@
-import { PaginationDto } from '../../../shared';
 import { TodoEntity } from '../entities';
+import { GetTodosDto } from '../dtos';
 import { TodoRepository } from '../repositories/respository';
 import { GetTodos, GetTodosUseCase } from './getAll.usecase';
 
@@ -20,7 +20,7 @@ describe('tests in getAll.usecase.ts', () => {
 	});
 
 	test('should call repository.getAll with correct parameters', async () => {
-		const paginationDto = PaginationDto.create({ page: 1, limit: 10 });
+		const query = GetTodosDto.create({ page: 1, limit: 10 });
 
 		const paginationResult = {
 			results: [new TodoEntity(1, 'Test Todo')],
@@ -33,18 +33,18 @@ describe('tests in getAll.usecase.ts', () => {
 
 		repository.getAll.mockResolvedValue(paginationResult);
 
-		const result = await getTodosUseCase.execute(paginationDto);
+		const result = await getTodosUseCase.execute(query);
 
-		expect(repository.getAll).toHaveBeenCalledWith(paginationDto);
+		expect(repository.getAll).toHaveBeenCalledWith(query);
 		expect(result).toBe(paginationResult);
 	});
 
 	test('should throw an error if repository.getAll fails', async () => {
-		const paginationDto = PaginationDto.create({ page: 1, limit: 10 });
+		const query = GetTodosDto.create({ page: 1, limit: 10 });
 		const errorMessage = 'GetAll failed';
 
 		repository.getAll.mockRejectedValue(new Error(errorMessage));
 
-		await expect(getTodosUseCase.execute(paginationDto)).rejects.toThrow(errorMessage);
+		await expect(getTodosUseCase.execute(query)).rejects.toThrow(errorMessage);
 	});
 });
