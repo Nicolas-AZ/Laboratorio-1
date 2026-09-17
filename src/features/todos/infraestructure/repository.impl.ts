@@ -1,3 +1,4 @@
+import { type TodoFilterStrategy } from '../domain/strategies/todo-filter.strategy';
 // src\features\todos\infraestructure\repository.impl.ts
 
 import { type PaginationDto, type PaginationResponseEntity } from '../../shared';
@@ -18,8 +19,8 @@ export class TodoRepositoryImpl implements TodoRepository {
 		return await this.datasource.create(createDto);
 	}
 
-	async getAll(pagination: PaginationDto): Promise<PaginationResponseEntity<TodoEntity[]>> {
-		return await this.datasource.getAll(pagination);
+	async getAll(pagination: PaginationDto, strategy?: TodoFilterStrategy): Promise<PaginationResponseEntity<TodoEntity[]>> {
+		return strategy ? await this.datasource.getAll(pagination, strategy) : await this.datasource.getAll(pagination);
 	}
 
 	async getById(getByIdDto: GetTodoByIdDto): Promise<TodoEntity> {

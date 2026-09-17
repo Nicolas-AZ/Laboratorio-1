@@ -1,7 +1,14 @@
-// src\features\todos\infraestructure\local.datasource.impl.ts
+import {
+	AllTodosStrategy,
+	type TodoFilterStrategy
+} from '../domain/strategies/todo-filter.strategy';
 
 import { ONE, ZERO, AppError } from '../../../core';
-import { type PaginationDto, type PaginationResponseEntity } from '../../shared';
+import {
+	type PaginationDto,
+	type PaginationResponseEntity
+} from '../../shared';
+
 import {
 	TodoEntity,
 	type CreateTodoDto,
@@ -24,18 +31,25 @@ const TODOS_MOCK = [
 ];
 
 export class TodoDatasourceImpl implements TodoDatasource {
-	public async getAll(pagination: PaginationDto): Promise<PaginationResponseEntity<TodoEntity[]>> {
+	public async getAll(
+		pagination: PaginationDto,
+		strategy?: TodoFilterStrategy
+	): Promise<PaginationResponseEntity<TodoEntity[]>> {
 		const { page, limit } = pagination;
 
-		const todos = TODOS_MOCK;
-		const total = TODOS_MOCK.length;
+		const filter = strategy ?? new AllTodosStrategy();
 
+		const todos = TODOS_MOCK
+			.map((todo) => TodoEntity.fromJson(todo))
+			.filter((todo) => filter.matches(todo));
+
+		const total = todos.length;
 		const totalPages = Math.ceil(total / limit);
 		const nextPage = page < totalPages ? page + ONE : null;
 		const prevPage = page > ONE ? page - ONE : null;
 
 		return {
-			results: todos.slice((page - ONE) * limit, page * limit).map((todo) => TodoEntity.fromJson(todo)),
+			results: todos.slice((page - ONE) * limit, page * limit),
 			currentPage: page,
 			nextPage,
 			prevPage,
@@ -44,34 +58,66 @@ export class TodoDatasourceImpl implements TodoDatasource {
 		};
 	}
 
-	public async getById(getByIdDto: GetTodoByIdDto): Promise<TodoEntity> {
-		const todo = TODOS_MOCK.find((todo) => todo.id === getByIdDto.id);
-		if (!todo) throw AppError.notFound(`Todo with id ${getByIdDto.id} not found`);
+	public async getById(
+		getByIdDto: GetTodoByIdDto
+	): Promise<TodoEntity> {
+		const todo = TODOS_MOCK.find(
+			(todo) => todo.id === getByIdDto.id
+		);
+
+		if (!todo) {
+			throw AppError.notFound(
+				`Todo with id ${getByIdDto.id} not found`
+			);
+		}
+
 		return TodoEntity.fromJson(todo);
 	}
 
-	public async create(createDto: CreateTodoDto): Promise<TodoEntity> {
-		const createdTodo = { id: TODOS_MOCK.length + ONE, ...createDto, isCompleted: false };
+	public async create(
+		createDto: CreateTodoDto
+	): Promise<TodoEntity> {
+		const createdTodo = {
+			id: TODOS_MOCK.length + ONE,
+			...createDto,
+			isCompleted: false
+		};
+
 		TODOS_MOCK.push(createdTodo);
+
 		return TodoEntity.fromJson(createdTodo);
 	}
 
-	public async update(updateDto: UpdateTodoDto): Promise<TodoEntity> {
+	public async update(
+		updateDto: UpdateTodoDto
+	): Promise<TodoEntity> {
 		const { id } = await this.getById(updateDto);
-		const index = TODOS_MOCK.findIndex((todo) => todo.id === id);
+		const index = TODOS_MOCK.findIndex(
+			(todo) => todo.id === id
+		);
 
 		TODOS_MOCK[index] = {
 			...TODOS_MOCK[index],
-			...Object.fromEntries(Object.entries(updateDto).filter(([_, v]) => v !== undefined))
+			...Object.fromEntries(
+				Object.entries(updateDto).filter(
+					([_, value]) => value !== undefined
+				)
+			)
 		};
 
 		return TodoEntity.fromJson(TODOS_MOCK[index]);
 	}
 
-	public async delete(getByIdDto: GetTodoByIdDto): Promise<TodoEntity> {
+	public async delete(
+		getByIdDto: GetTodoByIdDto
+	): Promise<TodoEntity> {
 		const { id } = await this.getById(getByIdDto);
-		const index = TODOS_MOCK.findIndex((todo) => todo.id === id);
+		const index = TODOS_MOCK.findIndex(
+			(todo) => todo.id === id
+		);
+
 		const deletedTodo = TODOS_MOCK.splice(index, ONE)[ZERO];
+
 		return TodoEntity.fromJson(deletedTodo);
 	}
 }
