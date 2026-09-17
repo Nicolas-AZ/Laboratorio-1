@@ -1,3 +1,5 @@
+import { AppError } from '../../../core';
+import { CompletedTodosStrategy } from '../domain/strategies/todo-filter.strategy';
 // src\features\todos\presentation\controller.ts
 
 import { type NextFunction, type Request, type Response } from 'express';
@@ -28,6 +30,7 @@ interface RequestBody {
 }
 
 interface RequestQuery {
+	completed?: string;
 	page: string;
 	limit: string;
 }
@@ -41,10 +44,15 @@ export class TodoController {
 		res: Response<SuccessResponse<PaginationResponseEntity<TodoEntity[]>>>,
 		next: NextFunction
 	): void => {
-		const { page = ONE, limit = TEN } = req.query;
+		const { page = ONE, limit = TEN, completed } = req.query;
+        if (completed !== undefined && completed !== 'true' && completed !== 'false') {
+            next(AppError.badRequest('completed must be true or false'));
+            return;
+        }
+        const strategy = completed === undefined ? undefined : new CompletedTodosStrategy(completed === 'true');
 		const paginationDto = PaginationDto.create({ page: +page, limit: +limit });
 		new GetTodos(this.repository)
-			.execute(paginationDto)
+			.execute(paginationDto, strategy)
 			.then((result) => res.json({ data: result }))
 			.catch((error) => {
 				next(error);
