@@ -3,10 +3,14 @@
 import { type PaginationDto, type PaginationResponseEntity } from '../../../shared';
 import { type UpdateTodoDto, type CreateTodoDto, type GetTodoByIdDto } from '../dtos';
 import { type TodoEntity } from '../entities';
+import { type TodoFilterStrategy } from '../strategies/todo-filter.strategy';
 
 export abstract class TodoDatasource {
 	abstract create(createDto: CreateTodoDto): Promise<TodoEntity>;
-	abstract getAll(pagination: PaginationDto): Promise<PaginationResponseEntity<TodoEntity[]>>;
+	abstract getAll(
+		pagination: PaginationDto,
+		filterStrategy: TodoFilterStrategy
+	): Promise<PaginationResponseEntity<TodoEntity[]>>;
 	abstract getById(getByIdDto: GetTodoByIdDto): Promise<TodoEntity>;
 	abstract update(updateDto: UpdateTodoDto): Promise<TodoEntity>;
 	abstract delete(getByIdDto: GetTodoByIdDto): Promise<TodoEntity>;

@@ -2,7 +2,7 @@
 
 import { type NextFunction, type Request, type Response } from 'express';
 
-import { type SuccessResponse, HttpCode, ONE, TEN } from '../../../core';
+import { AppError, type SuccessResponse, HttpCode, ONE, TEN } from '../../../core';
 import { PaginationDto, type PaginationResponseEntity } from '../../shared';
 
 import {
@@ -14,6 +14,10 @@ import {
 	GetTodoByIdDto,
 	UpdateTodoDto,
 	GetTodos,
+	AllTodosStrategy,
+	CompletedTodosStrategy,
+	PendingTodosStrategy,
+	type TodoFilterStrategy,
 	type TodoEntity,
 	type TodoRepository
 } from '../domain';
@@ -30,6 +34,7 @@ interface RequestBody {
 interface RequestQuery {
 	page: string;
 	limit: string;
+	completed?: string;
 }
 
 export class TodoController {
@@ -41,15 +46,25 @@ export class TodoController {
 		res: Response<SuccessResponse<PaginationResponseEntity<TodoEntity[]>>>,
 		next: NextFunction
 	): void => {
-		const { page = ONE, limit = TEN } = req.query;
+		const { page = ONE, limit = TEN, completed } = req.query;
 		const paginationDto = PaginationDto.create({ page: +page, limit: +limit });
+		const filterStrategy = this.getFilterStrategy(completed);
 		new GetTodos(this.repository)
-			.execute(paginationDto)
+			.execute(paginationDto, filterStrategy)
 			.then((result) => res.json({ data: result }))
 			.catch((error) => {
 				next(error);
 			});
 	};
+
+	private getFilterStrategy(completed?: string): TodoFilterStrategy {
+		if (completed === undefined) return new AllTodosStrategy();
+		if (completed === 'true') return new CompletedTodosStrategy();
+		if (completed === 'false') return new PendingTodosStrategy();
+		throw AppError.badRequest('Error validating completed filter', [
+			{ fields: ['completed'], constraint: 'Completed must be true or false' }
+		]);
+	}
 
 	public getById = (req: Request<Params>, res: Response<SuccessResponse<TodoEntity>>, next: NextFunction): void => {
 		const { id } = req.params;

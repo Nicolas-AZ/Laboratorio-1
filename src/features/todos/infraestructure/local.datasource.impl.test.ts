@@ -1,6 +1,6 @@
 import { AppError } from '../../../core';
 import { PaginationDto } from '../../shared';
-import { CreateTodoDto, GetTodoByIdDto, TodoEntity, UpdateTodoDto } from '../domain';
+import { AllTodosStrategy, CreateTodoDto, GetTodoByIdDto, TodoEntity, UpdateTodoDto } from '../domain';
 import { TodoDatasourceImpl } from './local.datasource.impl';
 
 describe('tests in local.datasource.impl.ts', () => {
@@ -12,7 +12,7 @@ describe('tests in local.datasource.impl.ts', () => {
 			{ id: 1, text: 'First TODO...', isCompleted: false },
 			{ id: 2, text: 'Second TODO...', isCompleted: false }
 		];
-		const result = await todoDatasource.getAll(paginationDto);
+		const result = await todoDatasource.getAll(paginationDto, new AllTodosStrategy());
 		expect(result).toEqual({
 			results: expectedResults.map((todo) => TodoEntity.fromJson(todo)),
 			currentPage: 1,

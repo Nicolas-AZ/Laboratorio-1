@@ -7,7 +7,8 @@ import {
 	type CreateTodoDto,
 	type GetTodoByIdDto,
 	type UpdateTodoDto,
-	type TodoDatasource
+	type TodoDatasource,
+	type TodoFilterStrategy
 } from '../domain';
 
 const TODOS_MOCK = [
@@ -24,18 +25,21 @@ const TODOS_MOCK = [
 ];
 
 export class TodoDatasourceImpl implements TodoDatasource {
-	public async getAll(pagination: PaginationDto): Promise<PaginationResponseEntity<TodoEntity[]>> {
+	public async getAll(
+		pagination: PaginationDto,
+		filterStrategy: TodoFilterStrategy
+	): Promise<PaginationResponseEntity<TodoEntity[]>> {
 		const { page, limit } = pagination;
 
-		const todos = TODOS_MOCK;
-		const total = TODOS_MOCK.length;
+		const todos = filterStrategy.filter(TODOS_MOCK.map((todo) => TodoEntity.fromJson(todo)));
+		const total = todos.length;
 
 		const totalPages = Math.ceil(total / limit);
 		const nextPage = page < totalPages ? page + ONE : null;
 		const prevPage = page > ONE ? page - ONE : null;
 
 		return {
-			results: todos.slice((page - ONE) * limit, page * limit).map((todo) => TodoEntity.fromJson(todo)),
+			results: todos.slice((page - ONE) * limit, page * limit),
 			currentPage: page,
 			nextPage,
 			prevPage,
