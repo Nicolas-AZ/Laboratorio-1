@@ -4,10 +4,12 @@ import { ONE, ZERO, AppError } from '../../../core';
 import { type PaginationDto, type PaginationResponseEntity } from '../../shared';
 import {
 	TodoEntity,
+	AllTodosFilterStrategy,
 	type CreateTodoDto,
 	type GetTodoByIdDto,
 	type UpdateTodoDto,
-	type TodoDatasource
+	type TodoDatasource,
+	type TodoFilterStrategy
 } from '../domain';
 
 const TODOS_MOCK = [
@@ -24,18 +26,23 @@ const TODOS_MOCK = [
 ];
 
 export class TodoDatasourceImpl implements TodoDatasource {
-	public async getAll(pagination: PaginationDto): Promise<PaginationResponseEntity<TodoEntity[]>> {
+	public async getAll(
+		pagination: PaginationDto,
+		filterStrategy: TodoFilterStrategy = new AllTodosFilterStrategy()
+	): Promise<PaginationResponseEntity<TodoEntity[]>> {
 		const { page, limit } = pagination;
 
-		const todos = TODOS_MOCK;
-		const total = TODOS_MOCK.length;
+		const filteredTodos = TODOS_MOCK.map((todo) => TodoEntity.fromJson(todo)).filter((todo) =>
+			filterStrategy.matches(todo)
+		);
+		const total = filteredTodos.length;
 
 		const totalPages = Math.ceil(total / limit);
 		const nextPage = page < totalPages ? page + ONE : null;
 		const prevPage = page > ONE ? page - ONE : null;
 
 		return {
-			results: todos.slice((page - ONE) * limit, page * limit).map((todo) => TodoEntity.fromJson(todo)),
+			results: filteredTodos.slice((page - ONE) * limit, page * limit),
 			currentPage: page,
 			nextPage,
 			prevPage,

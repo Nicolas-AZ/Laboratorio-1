@@ -14,6 +14,7 @@ import {
 	GetTodoByIdDto,
 	UpdateTodoDto,
 	GetTodos,
+	TodoFilterStrategyFactory,
 	type TodoEntity,
 	type TodoRepository
 } from '../domain';
@@ -30,6 +31,7 @@ interface RequestBody {
 interface RequestQuery {
 	page: string;
 	limit: string;
+	completed?: string;
 }
 
 export class TodoController {
@@ -41,10 +43,11 @@ export class TodoController {
 		res: Response<SuccessResponse<PaginationResponseEntity<TodoEntity[]>>>,
 		next: NextFunction
 	): void => {
-		const { page = ONE, limit = TEN } = req.query;
+		const { page = ONE, limit = TEN, completed } = req.query;
 		const paginationDto = PaginationDto.create({ page: +page, limit: +limit });
+		const filterStrategy = completed !== undefined ? TodoFilterStrategyFactory.create(completed) : undefined;
 		new GetTodos(this.repository)
-			.execute(paginationDto)
+			.execute(paginationDto, filterStrategy)
 			.then((result) => res.json({ data: result }))
 			.catch((error) => {
 				next(error);

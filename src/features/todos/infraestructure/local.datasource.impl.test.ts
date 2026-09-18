@@ -1,6 +1,6 @@
 import { AppError } from '../../../core';
 import { PaginationDto } from '../../shared';
-import { CreateTodoDto, GetTodoByIdDto, TodoEntity, UpdateTodoDto } from '../domain';
+import { CreateTodoDto, GetTodoByIdDto, TodoEntity, UpdateTodoDto, CompletedTodoFilterStrategy } from '../domain';
 import { TodoDatasourceImpl } from './local.datasource.impl';
 
 describe('tests in local.datasource.impl.ts', () => {
@@ -21,6 +21,13 @@ describe('tests in local.datasource.impl.ts', () => {
 			total: 2,
 			totalPages: 1
 		});
+	});
+
+	test('should return only completed TODOs when using CompletedTodoFilterStrategy', async () => {
+		const paginationDto = PaginationDto.create({ page: 1, limit: 10 });
+		const result = await todoDatasource.getAll(paginationDto, new CompletedTodoFilterStrategy());
+		expect(result.results).toEqual([]);
+		expect(result.total).toBe(0);
 	});
 
 	test('should return a TODO by id', async () => {
