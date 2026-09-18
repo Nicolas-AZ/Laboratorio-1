@@ -179,6 +179,16 @@ describe('tests in routes', () => {
 			});
 	});
 
+	test('should return only completed TODOs /todos?completed=true', async () => {
+		await request(testServer.app)
+			.get(`${url}?completed=true`)
+			.expect(HttpCode.OK)
+			.expect('Content-Type', /json/)
+			.then(({ body }: { body: SuccessResponse<PaginationResponseEntity<TodoEntity[]>> }) => {
+				expect(body.data?.results).toEqual([{ id: 1, isCompleted: true, text: 'First TODO...' }]);
+			});
+	});
+
 	test('should delete a TODO /todos/1', async () => {
 		const expectedResponse = {
 			data: {

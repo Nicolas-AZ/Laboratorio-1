@@ -1,6 +1,7 @@
 import { PaginationDto } from '../../../shared';
 import { TodoEntity } from '../entities';
 import { TodoRepository } from '../repositories/respository';
+import { CompletedTodoFilterStrategy } from '../strategies';
 import { GetTodos, GetTodosUseCase } from './getAll.usecase';
 
 describe('tests in getAll.usecase.ts', () => {
@@ -46,5 +47,26 @@ describe('tests in getAll.usecase.ts', () => {
 		repository.getAll.mockRejectedValue(new Error(errorMessage));
 
 		await expect(getTodosUseCase.execute(paginationDto)).rejects.toThrow(errorMessage);
+	});
+
+	test('should forward the filterStrategy to repository.getAll when provided', async () => {
+		const paginationDto = PaginationDto.create({ page: 1, limit: 10 });
+		const filterStrategy = new CompletedTodoFilterStrategy();
+
+		const paginationResult = {
+			results: [],
+			currentPage: 1,
+			nextPage: null,
+			prevPage: null,
+			total: 0,
+			totalPages: 0
+		};
+
+		repository.getAll.mockResolvedValue(paginationResult);
+
+		const result = await getTodosUseCase.execute(paginationDto, filterStrategy);
+
+		expect(repository.getAll).toHaveBeenCalledWith(paginationDto, filterStrategy);
+		expect(result).toBe(paginationResult);
 	});
 });

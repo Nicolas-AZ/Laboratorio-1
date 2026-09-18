@@ -1,5 +1,5 @@
 import { PaginationDto } from '../../shared';
-import { CreateTodoDto, GetTodoByIdDto, UpdateTodoDto } from '../domain';
+import { CreateTodoDto, GetTodoByIdDto, UpdateTodoDto, CompletedTodoFilterStrategy } from '../domain';
 import { TodoDatasource } from '../domain/datasources/datasource';
 import { TodoRepositoryImpl } from './repository.impl';
 
@@ -24,6 +24,13 @@ describe('tests in repository.impl.ts', () => {
 		const paginationDto = PaginationDto.create({ page: 1, limit: 10 });
 		await repository.getAll(paginationDto);
 		expect(datasource.getAll).toHaveBeenCalledWith(paginationDto);
+	});
+
+	test('getAll should forward the filterStrategy to datasource.getAll when provided', async () => {
+		const paginationDto = PaginationDto.create({ page: 1, limit: 10 });
+		const filterStrategy = new CompletedTodoFilterStrategy();
+		await repository.getAll(paginationDto, filterStrategy);
+		expect(datasource.getAll).toHaveBeenCalledWith(paginationDto, filterStrategy);
 	});
 
 	test('getById should call datasource.getById with right arguments', async () => {
