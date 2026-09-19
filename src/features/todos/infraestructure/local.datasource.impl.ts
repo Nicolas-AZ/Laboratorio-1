@@ -4,6 +4,7 @@ import { ONE, ZERO, AppError } from '../../../core';
 import { type PaginationDto, type PaginationResponseEntity } from '../../shared';
 import {
 	TodoEntity,
+	type TodoCompletedEvents,
 	type CreateTodoDto,
 	type GetTodoByIdDto,
 	type UpdateTodoDto,
@@ -24,6 +25,8 @@ const TODOS_MOCK = [
 ];
 
 export class TodoDatasourceImpl implements TodoDatasource {
+	constructor(private readonly todoCompletedEvents?: TodoCompletedEvents) {}
+
 	public async getAll(pagination: PaginationDto): Promise<PaginationResponseEntity<TodoEntity[]>> {
 		const { page, limit } = pagination;
 
@@ -57,7 +60,8 @@ export class TodoDatasourceImpl implements TodoDatasource {
 	}
 
 	public async update(updateDto: UpdateTodoDto): Promise<TodoEntity> {
-		const { id } = await this.getById(updateDto);
+		const todoBefore = await this.getById(updateDto);
+		const { id } = todoBefore;
 		const index = TODOS_MOCK.findIndex((todo) => todo.id === id);
 
 		TODOS_MOCK[index] = {
@@ -65,7 +69,13 @@ export class TodoDatasourceImpl implements TodoDatasource {
 			...Object.fromEntries(Object.entries(updateDto).filter(([_, v]) => v !== undefined))
 		};
 
-		return TodoEntity.fromJson(TODOS_MOCK[index]);
+		const todoAfter = TodoEntity.fromJson(TODOS_MOCK[index]);
+
+		if (!todoBefore.isCompleted && todoAfter.isCompleted) {
+			await this.todoCompletedEvents?.notify(todoAfter);
+		}
+
+		return todoAfter;
 	}
 
 	public async delete(getByIdDto: GetTodoByIdDto): Promise<TodoEntity> {

@@ -1,6 +1,6 @@
 import { AppError } from '../../../core';
 import { PaginationDto } from '../../shared';
-import { CreateTodoDto, GetTodoByIdDto, TodoEntity, UpdateTodoDto } from '../domain';
+import { CreateTodoDto, GetTodoByIdDto, TodoCompletedEvents, TodoEntity, UpdateTodoDto } from '../domain';
 import { TodoDatasourceImpl } from './local.datasource.impl';
 
 describe('tests in local.datasource.impl.ts', () => {
@@ -54,6 +54,20 @@ describe('tests in local.datasource.impl.ts', () => {
 
 		const result = await todoDatasource.update(data);
 		expect(result).toEqual(updatedTodo);
+	});
+
+	test('should notify when a TODO is completed', async () => {
+		const events = new TodoCompletedEvents();
+		const observer = { onTodoCompleted: jest.fn() };
+		events.subscribe(observer);
+		const datasource = new TodoDatasourceImpl(events);
+		const data = UpdateTodoDto.create({ id: 2, isCompleted: true });
+
+		const result = await datasource.update(data);
+
+		expect(result.isCompleted).toBe(true);
+		expect(observer.onTodoCompleted).toHaveBeenCalledTimes(1);
+		expect(observer.onTodoCompleted).toHaveBeenCalledWith(result);
 	});
 
 	test('should delete a TODO', async () => {
