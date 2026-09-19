@@ -1,8 +1,7 @@
-// src\features\todos\presentation\routes.ts
-
 import { Router } from 'express';
 
-import { TodoDatasourceImpl, TodoRepositoryImpl } from '../infraestructure';
+import { TodoCompletionNotifier } from '../domain';
+import { LogTodoObserver, NotificationTodoObserver, TodoDatasourceImpl, TodoRepositoryImpl } from '../infraestructure';
 import { TodoController } from './controller';
 import { AuthDatasourceImpl, AuthMiddleware, AuthRepositoryImpl } from '../../auth';
 
@@ -13,7 +12,14 @@ export class TodoRoutes {
 		//* This datasource can be change
 		const datasource = new TodoDatasourceImpl();
 		const repository = new TodoRepositoryImpl(datasource);
-		const controller = new TodoController(repository);
+
+		//* Observer pattern: se suscriben los observadores que deben
+		//* reaccionar cuando una tarea se marca como completada.
+		const todoCompletionNotifier = new TodoCompletionNotifier();
+		todoCompletionNotifier.subscribe(new LogTodoObserver());
+		todoCompletionNotifier.subscribe(new NotificationTodoObserver());
+
+		const controller = new TodoController(repository, todoCompletionNotifier);
 
 		// * Authentication middleware
 		const authDatasource = new AuthDatasourceImpl();

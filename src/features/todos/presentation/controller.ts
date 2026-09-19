@@ -14,6 +14,7 @@ import {
 	GetTodoByIdDto,
 	UpdateTodoDto,
 	GetTodos,
+	TodoCompletionNotifier,
 	type TodoEntity,
 	type TodoRepository
 } from '../domain';
@@ -34,7 +35,10 @@ interface RequestQuery {
 
 export class TodoController {
 	//* Dependency injection
-	constructor(private readonly repository: TodoRepository) {}
+	constructor(
+		private readonly repository: TodoRepository,
+		private readonly notifier: TodoCompletionNotifier = new TodoCompletionNotifier()
+	) {}
 
 	public getAll = (
 		req: Request<unknown, unknown, unknown, RequestQuery>,
@@ -81,7 +85,7 @@ export class TodoController {
 		const { id } = req.params;
 		const { text, isCompleted } = req.body;
 		const updateDto = UpdateTodoDto.create({ id: Number(id), text, isCompleted });
-		new UpdateTodo(this.repository)
+		new UpdateTodo(this.repository, this.notifier)
 			.execute(updateDto)
 			.then((result) => res.json({ data: result }))
 			.catch(next);
