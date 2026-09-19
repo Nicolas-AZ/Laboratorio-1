@@ -1,10 +1,8 @@
-// src\features\todos\presentation\routes.ts
-
 import { Router } from 'express';
 
 import { TodoDatasourceImpl, TodoRepositoryImpl } from '../infraestructure';
 import { TodoController } from './controller';
-import { AuthDatasourceImpl, AuthMiddleware, AuthRepositoryImpl } from '../../auth';
+import { createAuthMiddleware } from './dependencies';
 
 export class TodoRoutes {
 	static get routes(): Router {
@@ -16,9 +14,7 @@ export class TodoRoutes {
 		const controller = new TodoController(repository);
 
 		// * Authentication middleware
-		const authDatasource = new AuthDatasourceImpl();
-		const authRepository = new AuthRepositoryImpl(authDatasource);
-		const authMiddleware = new AuthMiddleware(authRepository);
+		const authMiddleware = createAuthMiddleware();
 
 		router.get('/', controller.getAll);
 		router.get('/:id', controller.getById);
