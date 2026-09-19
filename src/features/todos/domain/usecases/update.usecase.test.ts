@@ -23,6 +23,12 @@ describe('tests in update.usecase.ts', () => {
 		const updateData = UpdateTodoDto.create({ id: 1, text: 'Test Todo updated' });
 		const updatedTodo: TodoEntity = { id: 1, text: 'Test Todo updated', isCompleted: false };
 
+		repository.getById.mockResolvedValue({
+			id: 1,
+			text: 'Test Todo',
+			isCompleted: false
+	});
+
 		repository.update.mockResolvedValue(updatedTodo);
 
 		const result = await updateTodoUseCase.execute(updateData);
