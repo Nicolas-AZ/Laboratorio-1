@@ -1,6 +1,6 @@
 // src\features\todos\presentation\routes.ts
 
-import { Router } from 'express';
+import { Router, type RequestHandler } from 'express';
 
 import { TodoDatasourceImpl, TodoRepositoryImpl } from '../infraestructure';
 import { TodoController } from './controller';
@@ -23,9 +23,8 @@ export class TodoRoutes {
 		router.get('/', controller.getAll);
 		router.get('/:id', controller.getById);
 		router.post('/', [authMiddleware.validateJWT], controller.create);
-		router.put('/:id', controller.update);
-		router.delete('/:id', controller.delete);
-
+		router.put('/:id', [authMiddleware.validateJWT as RequestHandler, controller.update as unknown as RequestHandler]);
+		router.delete('/:id', [authMiddleware.validateJWT as RequestHandler, controller.delete as unknown as RequestHandler]);
 		// rest of operations
 		// ...
 
