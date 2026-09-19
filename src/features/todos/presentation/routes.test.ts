@@ -171,6 +171,7 @@ describe('tests in routes', () => {
 
 		await request(testServer.app)
 			.put(`${url}/${expectedResponse.data.id}`)
+			.set('Authorization', `Bearer ${authToken}`)
 			.send(expectedResponse.data)
 			.expect(HttpCode.OK)
 			.expect('Content-Type', /json/)
@@ -190,6 +191,7 @@ describe('tests in routes', () => {
 
 		await request(testServer.app)
 			.delete(`${url}/${expectedResponse.data.id}`)
+			.set('Authorization', `Bearer ${authToken}`)
 			.expect(HttpCode.OK)
 			.expect('Content-Type', /json/)
 			.then(({ body }: { body: SuccessResponse<TodoEntity> }) => {
